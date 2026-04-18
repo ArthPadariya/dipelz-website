@@ -1,14 +1,12 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  background-color: #f5efe8;
-  font-family: 'Georgia', serif;
-  color: #3e2c23;
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
-.hero-section {
-  background: #faf7f3;;
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -6,7 +6,6 @@ export default function Hero() {
   return (
     <section
       style={{
-        marginTop: "80px",
         padding: "100px 0",
         background: "#f7f1eb",
         overflow: "hidden"
@@ -23,7 +22,9 @@ export default function Hero() {
           gap: "40px"
         }}
       >
+
         {/* LEFT CONTENT */}
+
         <motion.div
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -41,7 +42,7 @@ export default function Hero() {
           >
             Authentic Gujarati Taste,
             <br />
-            Ready When You Are,
+            Ready When You Are
           </h1>
 
           <p
@@ -55,7 +56,9 @@ export default function Hero() {
           </p>
 
           {/* BUTTONS */}
+
           <div style={{ display: "flex", gap: "15px", marginBottom: "40px" }}>
+
             <button
               style={{
                 background: "#8b2e1f",
@@ -83,17 +86,22 @@ export default function Hero() {
             >
               Explore Products
             </button>
+
           </div>
 
           {/* FEATURES */}
+
           <div style={{ display: "flex", gap: "40px", fontSize: "14px" }}>
             <span>✔ Preservative Free</span>
             <span>✔ No Artificial Additives</span>
             <span>✔ High Quality Ingredients</span>
           </div>
+
         </motion.div>
 
+
         {/* RIGHT SIDE IMAGES */}
+
         <div
           style={{
             flex: 1,
@@ -101,10 +109,12 @@ export default function Hero() {
             height: "500px"
           }}
         >
+
           {/* BACK IMAGE */}
+
           <motion.img
-            src="/product2.jpeg"
-            alt="Product 2"
+            src="/banner2.png"
+            alt="Banner 2"
             initial={{ rotate: -8, opacity: 0 }}
             animate={{ rotate: 0, opacity: 1 }}
             transition={{ duration: 1 }}
@@ -116,10 +126,11 @@ export default function Hero() {
             }}
           />
 
-          {/* FRONT IMAGE WITH CONTINUOUS ROTATION */}
+          {/* MAIN IMAGE */}
+
           <motion.img
-            src="/product1.jpeg"
-            alt="Product 1"
+            src="/banner1.png"
+            alt="Banner 1"
             animate={{ rotate: [0, 3, -3, 0] }}
             transition={{
               duration: 6,
@@ -133,7 +144,9 @@ export default function Hero() {
               width: "380px"
             }}
           />
+
         </div>
+
       </div>
     </section>
   );

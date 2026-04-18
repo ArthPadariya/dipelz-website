@@ -1,0 +1,229 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+//////////////////////////////////////////////////////
+// NEXTAUTH MODELS (MongoDB Compatible)
+//////////////////////////////////////////////////////
+
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  password       String?
+  role           String    @default("customer")
+  createdAt      DateTime  @default(now())
+
+  accounts       Account[]
+  sessions       Session[]
+  orders         Order[]
+}
+
+model Account {
+  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String  @db.ObjectId
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  
+}
+
+//////////////////////////////////////////////////////
+// PRODUCT
+//////////////////////////////////////////////////////
+
+model Product {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String     @unique
+  description String?
+  price       Float
+  oldPrice    Float?
+  stock       Int        @default(0)
+  bestSeller  Boolean    @default(false)
+  category    String?
+  images      String[]
+  createdAt   DateTime   @default(now())
+  content     Json?
+
+  variants      Variant[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  notifications StockNotification[]
+  wishlists     Wishlist[]
+  CartItems     CartItem[]
+}
+
+//////////////////////////////////////////////////////
+// ORDERS
+//////////////////////////////////////////////////////
+
+model Order {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  total     Float
+  status    String   @default("pending")
+  paymentStatus String @default("pending")
+  paymentId String?
+  createdAt DateTime @default(now())
+
+  name      String?
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  pincode   String?
+
+  user  User @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String @db.ObjectId
+  productId String @db.ObjectId
+  name      String
+  price     Float
+  quantity  Int
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+//////////////////////////////////////////////////////
+// REVIEWS
+//////////////////////////////////////////////////////
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+//////////////////////////////////////////////////////
+// STOCK NOTIFICATION
+//////////////////////////////////////////////////////
+
+model StockNotification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  createdAt DateTime @default(now())
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+//////////////////////////////////////////////////////
+// VARIANTS
+//////////////////////////////////////////////////////
+
+model Variant {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  packSize Int
+  price    Float
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
+}
+
+//////////////////////////////////////////////////////
+// CART
+//////////////////////////////////////////////////////
+
+model Cart {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userEmail String   @unique
+  createdAt DateTime @default(now())
+
+  items CartItem[]
+}
+
+model CartItem {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  cartId    String @db.ObjectId
+  productId String @db.ObjectId
+  quantity  Int
+
+  cart    Cart    @relation(fields: [cartId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+//////////////////////////////////////////////////////
+// WISHLIST
+//////////////////////////////////////////////////////
+
+model Wishlist {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
+  userEmail String
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([productId, userEmail])
+}
+
+model Coupon {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique
+  discount  Int
+  active    Boolean  @default(true)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model CouponUsage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userEmail String
+  couponId  String   @db.ObjectId
+  usedAt    DateTime @default(now())
+}
+
+model Feedback {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  email     String?
+  message   String
+  rating    Int?
+  createdAt DateTime @default(now())
+}
