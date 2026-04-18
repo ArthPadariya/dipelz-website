@@ -1,26 +1,31 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-// GET all products
 export async function GET(req) {
   try {
-
-    const { searchParams } = new URL(req.url)
-    const limit = Number(searchParams.get("limit")) || undefined
+    const { searchParams } = new URL(req.url);
+    const rawLimit = Number(searchParams.get("limit"));
+    const limit = Number.isFinite(rawLimit) && rawLimit > 0
+      ? rawLimit
+      : undefined;
 
     const products = await prisma.product.findMany({
       orderBy: { createdAt: "desc" },
-      take: limit
+      take: limit,
     });
 
     return NextResponse.json(products);
-
   } catch (error) {
-    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
+    console.error("GET /api/products failed:", error);
+    return NextResponse.json([], {
+      status: 500,
+      headers: {
+        "X-Error": "products-fetch-failed",
+      },
+    });
   }
 }
 
-// CREATE product
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -53,7 +58,7 @@ export async function POST(req) {
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error(error);
+    console.error("POST /api/products failed:", error);
     return NextResponse.json({ error: "Create failed" }, { status: 500 });
   }
 }

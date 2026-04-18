@@ -43,11 +43,14 @@ export default function CheckoutClient() {
 
         if (Array.isArray(data)) {
           setAvailableCoupons(data);
+        } else {
+          setAvailableCoupons([]);
         }
 
       } catch (err) {
 
         console.error("Coupon fetch error", err);
+        setAvailableCoupons([]);
 
       }
 

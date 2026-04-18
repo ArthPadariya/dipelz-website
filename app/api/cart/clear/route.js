@@ -4,21 +4,29 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
 export async function POST() {
-  const session = await getServerSession(authOptions);
+  try {
+    const session = await getServerSession(authOptions);
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const cart = await prisma.cart.findUnique({
-    where: { userEmail: session.user.email },
-  });
-
-  if (cart) {
-    await prisma.cartItem.deleteMany({
-      where: { cartId: cart.id },
+    const cart = await prisma.cart.findUnique({
+      where: { userEmail: session.user.email },
     });
-  }
 
-  return NextResponse.json({ success: true });
+    if (cart) {
+      await prisma.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("POST /api/cart/clear failed:", error);
+    return NextResponse.json(
+      { error: "Cart clear failed" },
+      { status: 500 }
+    );
+  }
 }

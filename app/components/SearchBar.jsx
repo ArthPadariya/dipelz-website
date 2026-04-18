@@ -47,17 +47,15 @@ export default function SearchBar() {
       }
 
       try {
-
         const res = await fetch(`/api/search?q=${query}`);
         const data = await res.json();
 
-        setResults(data);
+        setResults(Array.isArray(data) ? data : []);
         setOpen(true);
-
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error("Search failed:", error);
+        setResults([]);
       }
-
     }, 150);
 
     return () => clearTimeout(timer);

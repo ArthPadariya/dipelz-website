@@ -4,74 +4,66 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
+  try {
+    const session = await getServerSession(authOptions);
 
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  const { items } = await req.json();
-
-  if (!items || !items.length) {
-    return NextResponse.json({ success: true });
-  }
-
-  //////////////////////////////////////////////////////
-  // GET OR CREATE USER CART
-  //////////////////////////////////////////////////////
-
-  const cart = await prisma.cart.upsert({
-    where: {
-      userEmail: session.user.email
-    },
-    update: {},
-    create: {
-      userEmail: session.user.email
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
-  });
 
-  //////////////////////////////////////////////////////
-  // MERGE ITEMS
-  //////////////////////////////////////////////////////
+    const { items } = await req.json();
 
-  for (const item of items) {
+    if (!items || !items.length) {
+      return NextResponse.json({ success: true });
+    }
 
-    const existingItem = await prisma.cartItem.findFirst({
+    const cart = await prisma.cart.upsert({
       where: {
-        cartId: cart.id,
-        productId: item.productId
-      }
+        userEmail: session.user.email,
+      },
+      update: {},
+      create: {
+        userEmail: session.user.email,
+      },
     });
 
-    if (existingItem) {
-
-      await prisma.cartItem.update({
+    for (const item of items) {
+      const existingItem = await prisma.cartItem.findFirst({
         where: {
-          id: existingItem.id
-        },
-        data: {
-          quantity: existingItem.quantity + item.quantity
-        }
-      });
-
-    } else {
-
-      await prisma.cartItem.create({
-        data: {
           cartId: cart.id,
           productId: item.productId,
-          quantity: item.quantity
-        }
+        },
       });
 
+      if (existingItem) {
+        await prisma.cartItem.update({
+          where: {
+            id: existingItem.id,
+          },
+          data: {
+            quantity: existingItem.quantity + item.quantity,
+          },
+        });
+      } else {
+        await prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: item.productId,
+            quantity: item.quantity,
+          },
+        });
+      }
     }
 
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("POST /api/cart/merge failed:", error);
+    return NextResponse.json(
+      { error: "Cart merge failed" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ success: true });
-
 }

@@ -26,28 +26,28 @@ export default function CartDrawer() {
   //////////////////////////////////////////////////////
 
   useEffect(() => {
-
     const loadSuggestions = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        const safeProducts = Array.isArray(data) ? data : [];
 
-      const res = await fetch("/api/products");
-      const data = await res.json();
+        const filtered = safeProducts.filter(
+          (product) => !cart.some((c) => c.id === product.id)
+        );
 
-      if (!data) return;
+        const shuffled = [...filtered].sort(
+          () => 0.5 - Math.random()
+        );
 
-      const filtered = data.filter(
-        product => !cart.some(c => c.id === product.id)
-      );
-
-      const shuffled = filtered.sort(
-        () => 0.5 - Math.random()
-      );
-
-      setSuggested(shuffled.slice(0,4));
-
+        setSuggested(shuffled.slice(0, 4));
+      } catch (error) {
+        console.error("Suggested products failed:", error);
+        setSuggested([]);
+      }
     };
 
     loadSuggestions();
-
   }, [cart]);
 
   //////////////////////////////////////////////////////

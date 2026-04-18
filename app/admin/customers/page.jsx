@@ -7,8 +7,9 @@ export default function CustomersPage() {
 
   useEffect(() => {
     fetch("/api/admin/customers")
-      .then(res => res.json())
-      .then(data => setCustomers(data));
+      .then((res) => res.json())
+      .then((data) => setCustomers(Array.isArray(data) ? data : []))
+      .catch(() => setCustomers([]));
   }, []);
 
   return (

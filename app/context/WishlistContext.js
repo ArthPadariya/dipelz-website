@@ -23,11 +23,12 @@ export function WishlistProvider({ children }) {
       const res = await fetch("/api/wishlist");
       const data = await res.json();
 
-      setWishlist(data || []);
+      setWishlist(Array.isArray(data) ? data : []);
 
     } catch (err) {
 
       console.error("Wishlist fetch error:", err);
+      setWishlist([]);
 
     }
 

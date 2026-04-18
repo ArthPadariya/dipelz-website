@@ -4,45 +4,51 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
+  try {
+    const session = await getServerSession(authOptions);
 
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  const { productId } = await req.json();
-
-  if (!productId) {
-    return NextResponse.json(
-      { error: "Product ID required" },
-      { status: 400 }
-    );
-  }
-
-  const cart = await prisma.cart.findUnique({
-    where: {
-      userEmail: session.user.email
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
-  });
 
-  if (!cart) {
+    const { productId } = await req.json();
+
+    if (!productId) {
+      return NextResponse.json(
+        { error: "Product ID required" },
+        { status: 400 }
+      );
+    }
+
+    const cart = await prisma.cart.findUnique({
+      where: {
+        userEmail: session.user.email,
+      },
+    });
+
+    if (!cart) {
+      return NextResponse.json(
+        { error: "Cart not found" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.cartItem.deleteMany({
+      where: {
+        cartId: cart.id,
+        productId,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("POST /api/cart/remove failed:", error);
     return NextResponse.json(
-      { error: "Cart not found" },
-      { status: 404 }
+      { error: "Cart remove failed" },
+      { status: 500 }
     );
   }
-
-  await prisma.cartItem.deleteMany({
-    where: {
-      cartId: cart.id,
-      productId
-    }
-  });
-
-  return NextResponse.json({ success: true });
-
 }
