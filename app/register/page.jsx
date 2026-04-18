@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const [name, setName] = useState("");
@@ -42,10 +41,8 @@ export default function RegisterPage() {
         return;
       }
 
-      // Redirect to login with callback
       router.push(`/login?callbackUrl=${callbackUrl}`);
-
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
       setLoading(false);
     }
@@ -54,19 +51,13 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-6">
-
-        <h1 className="text-2xl font-semibold text-center">
-          Create Account
-        </h1>
+        <h1 className="text-2xl font-semibold text-center">Create Account</h1>
 
         {error && (
-          <p className="text-red-500 text-sm text-center">
-            {error}
-          </p>
+          <p className="text-red-500 text-sm text-center">{error}</p>
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-
           <input
             type="text"
             placeholder="Full Name"
@@ -121,8 +112,15 @@ export default function RegisterPage() {
             Login
           </a>
         </p>
-
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageContent />
+    </Suspense>
   );
 }

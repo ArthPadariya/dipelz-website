@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const [email, setEmail] = useState("");
@@ -35,8 +34,7 @@ export default function LoginPage() {
       }
 
       router.replace(callbackUrl);
-
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
       setLoading(false);
     }
@@ -45,19 +43,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-6">
-
-        <h2 className="text-2xl font-semibold text-center">
-          Login
-        </h2>
+        <h2 className="text-2xl font-semibold text-center">Login</h2>
 
         {error && (
-          <p className="text-red-500 text-sm text-center">
-            {error}
-          </p>
+          <p className="text-red-500 text-sm text-center">{error}</p>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
-
           <input
             type="email"
             placeholder="Email"
@@ -83,12 +75,9 @@ export default function LoginPage() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
-        <div className="text-center text-gray-400 text-sm">
-          OR
-        </div>
+        <div className="text-center text-gray-400 text-sm">OR</div>
 
         <button
           onClick={() => signIn("google", { callbackUrl })}
@@ -98,7 +87,7 @@ export default function LoginPage() {
         </button>
 
         <p className="text-sm text-center text-gray-500">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <a
             href={`/register?callbackUrl=${callbackUrl}`}
             className="text-blue-600 hover:underline"
@@ -106,8 +95,15 @@ export default function LoginPage() {
             Create Account
           </a>
         </p>
-
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
-// GET ALL ORDERS
 export async function GET() {
   const session = await getServerSession(authOptions);
 
@@ -27,7 +26,6 @@ export async function GET() {
   return NextResponse.json(orders);
 }
 
-// UPDATE ORDER STATUS
 export async function PATCH(req) {
   const session = await getServerSession(authOptions);
 

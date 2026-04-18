@@ -4,12 +4,11 @@ import { signOut } from "next-auth/react";
 import { useCart } from "../context/CartContext";
 
 export default function LogoutButton() {
-
   const { clearCart } = useCart();
 
   const handleLogout = async () => {
-    clearCart(); // clear context cart
-    localStorage.removeItem("guest_cart"); // clear guest cart
+    await clearCart();
+    localStorage.removeItem("guest_cart");
     await signOut({ callbackUrl: "/" });
   };
 
